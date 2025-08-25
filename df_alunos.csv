@@ -1,0 +1,27 @@
+id,nome,telefone,data_inicio,data_fim,status,aulas_restantes,faltas,turma,20/08,25/08,27/08,01/09,03/09,08/09,10/09,15/09,17/09,gr,nome_responsavel,whatsapp,cpf,cidade_uf,endereco,nome_beneficiario,curso,dia_aula,horario
+1.0,Ana Souza,13911111111.0,11111111111.0,Guarujá/SP,Rua A 10 Bairro Centro,João Souza,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+2.0,Carlos Lima,13922222222.0,22222222222.0,Guarujá/SP,Rua B 20 Bairro Centro,Maria Lima,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+3.0,Gustavo Miranda Silva Araujo,13981865248.0,45232359886.0,Guarujá/SP,Rua J 54 Avenida Atlântica,Betinha Miranda,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+4.0,Patrícia Alves,13933333333.0,33333333333.0,Guarujá/SP,Rua C 30 Bairro Morrinhos,Felipe Alves,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+5.0,Marcos Oliveira,13944444444.0,44444444444.0,Guarujá/SP,Rua D 40 Bairro Enseada,Laura Oliveira,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+6.0,Juliana Ferreira,13955555555.0,55555555555.0,Guarujá/SP,Rua E 50 Bairro Vila Edna,Pedro Ferreira,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+7.0,Ricardo Santos,13966666666.0,66666666666.0,Guarujá/SP,Rua F 60 Bairro Pae Cará,Ana Santos,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+8.0,Carolina Mendes,13977777777.0,77777777777.0,Guarujá/SP,Rua G 70 Bairro Jardim Boa Esperança,Lucas Mendes,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+9.0,Fernando Costa,13988888888.0,88888888888.0,Guarujá/SP,Rua H 80 Bairro Santo Antônio,Julia Costa,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+10.0,Sandra Rocha,13999999999.0,99999999999.0,Guarujá/SP,Rua I 90 Bairro Santa Rosa,Gabriel Rocha,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+11.0,João Batista,13910101010.0,10101010101.0,Guarujá/SP,Rua J 100 Bairro Perequê,Isabela Batista,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+12.0,Larissa Nogueira,13912121212.0,12121212121.0,Guarujá/SP,Rua K 110 Bairro Jardim Helena,Thiago Nogueira,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+13.0,André Martins,13913131313.0,13131313131.0,Guarujá/SP,Rua L 120 Bairro Jardim Conceição,Beatriz Martins,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+14.0,Renata Silva,13914141414.0,14141414141.0,Guarujá/SP,Rua M 130 Bairro Jardim Las Palmas,Rafael Silva,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+15.0,Pedro Gomes,13915151515.0,15151515151.0,Guarujá/SP,Rua N 140 Bairro Jardim Progresso,Camila Gomes,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+16.0,Vanessa Araújo,13916161616.0,16161616161.0,Guarujá/SP,Rua O 150 Bairro Jardim Praiano,Otávio Araújo,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+17.0,Thiago Ribeiro,13917171717.0,17171717171.0,Guarujá/SP,Rua P 160 Bairro Jardim Conceiçãozinha,Helena Ribeiro,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+18.0,Márcia Teixeira,13918181818.0,18181818181.0,Guarujá/SP,Rua Q 170 Bairro Jardim Boa Vista,Henrique Teixeira,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+19.0,Fábio Cardoso,13919191919.0,19191919191.0,Guarujá/SP,Rua R 180 Bairro Jardim Primavera,Sophia Cardoso,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+20.0,Paula Barbosa,13920202020.0,20202020202.0,Guarujá/SP,Rua S 190 Bairro Jardim Eldorado,Diego Barbosa,Hardware,Segunda e Quarta,13h,25/08/2025,20/10/2025,Em andamento,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+21.0,José Almeida,13921212121.0,21212121212.0,Guarujá/SP,Rua T 200 Bairro Jardim Conceiçãozinha,Mariana Almeida,Hardware,Segunda e Quarta,13h,,,Em espera,0.0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,,,,
+,,,,,Em espera,,0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,22.0,Teste,11111111111.0,11111111111.0,Guarujá/SP,Teste,Teste,Hardware,Segunda e Quarta,13h
+,,,,,Em espera,,0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,23.0,Teste,11111111111.0,11111111111.0,Guarujá/SP,Teste,Teste,Hardware,Segunda e Quarta,13h
+,,,,,Em espera,,0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,24.0,Gustavo,11111111111.0,11111111111.0,Guarujá/SP,Teste,Teste,Hardware,Segunda e Quarta,13h
+,,,,,Em espera,,0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,25.0,Gustavo,11111111111.0,11111111111.0,Guarujá/SP,Teste,Jose,Hardware,Segunda e Quarta,13h
+,,,,,Em espera,,0,Hardware_Segunda_e_Quarta_13h,,,,,,,,,,26.0,Teste,11111111111,11111111111,Guarujá/SP,Teste,Teste,Hardware,Segunda e Quarta,13h
