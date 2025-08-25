@@ -333,3 +333,5 @@ if menu == "📅 Chamada":
             df_reprovados = pd.read_csv(f"{escolha_chamada}_reprovado.csv")
             df_reprovados_editado = st.data_editor(df_reprovados, num_rows="dynamic")
             df_reprovados_editado.to_csv(f"{escolha_chamada}_reprovado.csv", index=False)
+
+#teste
