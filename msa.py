@@ -184,18 +184,34 @@ elif menu == "📋 Ver Alunos":
         st.info(f"Editando alunos da turma: **{escolha}**")
         df_editado = st.data_editor(df_view, num_rows="dynamic", use_container_width=True)
 
-        if st.button("Salvar Alterações"):
-            df_editado.to_csv(arquivo, index=False)
+        col1, col2 = st.columns(2)
 
-            # atualizar no df_alunos.csv também
-            df_master = pd.read_csv("df_alunos.csv")
-            df_master = df_master[df_master["turma"] != escolha]
-            df_master = pd.concat([df_master, df_editado], ignore_index=True)
-            df_master.to_csv("df_alunos.csv", index=False)
+        with col1:
+            if st.button("Salvar Alterações"):
+                df_editado.to_csv(arquivo, index=False)
 
-            st.success("Alterações salvas com sucesso!")
+                # atualizar no df_alunos.csv também
+                df_master = pd.read_csv("df_alunos.csv")
+                df_master = df_master[df_master["turma"] != escolha]
+                df_master = pd.concat([df_master, df_editado], ignore_index=True)
+                df_master.to_csv("df_alunos.csv", index=False)
+
+                st.success("Alterações salvas com sucesso!")
+
+        with col2:
+            if st.button("❌ Excluir Turma"):
+                os.remove(arquivo)
+
+                # Atualizar df_alunos removendo alunos dessa turma
+                df_master = pd.read_csv("df_alunos.csv")
+                df_master = df_master[df_master["turma"] != escolha]
+                df_master.to_csv("df_alunos.csv", index=False)
+
+                st.warning(f"Turma **{escolha}** excluída com sucesso!")
+                st.rerun()
     else:
         st.warning("Nenhum dado encontrado para exibir.")
+
 
 # 📅 3. CHAMADA
 if menu == "📅 Chamada":
@@ -285,68 +301,93 @@ if menu == "📅 Chamada":
         st.info(f"Editando chamada: **{arquivo_chamada}**")
         df_editado = st.data_editor(df_chamada, num_rows="dynamic", use_container_width=True)
 
-        if st.button("Salvar Chamada"):
-            # Recalcula faltas/presenças antes de salvar
-            for i, row in df_editado.iterrows():
-                respostas = row.drop(labels=["gr", "nome_beneficiario", "Faltas", "Presenças"])
-                faltas = (respostas == "A").sum()
-                presencas = (respostas == "P").sum()
-                df_editado.at[i, "Faltas"] = faltas
-                df_editado.at[i, "Presenças"] = presencas
+        col1, col2 = st.columns(2)
 
-            df_editado.to_csv(arquivo_chamada, index=False)
-
-            # Atualizar faltas no cadastro da turma
-            turma_nome = escolha_chamada.split("_chamada_")[0]
-            if os.path.exists(f"{turma_nome}.csv"):
-                df_turma = pd.read_csv(f"{turma_nome}.csv")
+        with col1:    
+            if st.button("Salvar Chamada"):
+                # Recalcula faltas/presenças antes de salvar
                 for i, row in df_editado.iterrows():
-                    df_turma.loc[df_turma["gr"] == row["gr"], "faltas"] = row["Faltas"]
-                df_turma.to_csv(f"{turma_nome}.csv", index=False)
+                    respostas = row.drop(labels=["gr", "nome_beneficiario", "Faltas", "Presenças"])
+                    faltas = (respostas == "A").sum()
+                    presencas = (respostas == "P").sum()
+                    df_editado.at[i, "Faltas"] = faltas
+                    df_editado.at[i, "Presenças"] = presencas
 
-            # ------------------ NOVA LÓGICA ------------------ #
-            arquivo_reprovado = f"{escolha_chamada}_reprovado.csv"
-            arquivo_finalizado = f"{escolha_chamada}_finalizado.csv"
+                df_editado.to_csv(arquivo_chamada, index=False)
 
-            df_reprovados = pd.read_csv(arquivo_reprovado) if os.path.exists(arquivo_reprovado) else pd.DataFrame(columns=df_editado.columns)
-            df_finalizados = pd.read_csv(arquivo_finalizado) if os.path.exists(arquivo_finalizado) else pd.DataFrame(columns=df_editado.columns)
+                # Atualizar faltas no cadastro da turma
+                turma_nome = escolha_chamada.split("_chamada_")[0]
+                if os.path.exists(f"{turma_nome}.csv"):
+                    df_turma = pd.read_csv(f"{turma_nome}.csv")
+                    for i, row in df_editado.iterrows():
+                        df_turma.loc[df_turma["gr"] == row["gr"], "faltas"] = row["Faltas"]
+                    df_turma.to_csv(f"{turma_nome}.csv", index=False)
 
-            mover_reprovados = []
-            mover_finalizados = []
+                # ------------------ NOVA LÓGICA ------------------ #
+                arquivo_reprovado = f"{escolha_chamada}_reprovado.csv"
+                arquivo_finalizado = f"{escolha_chamada}_finalizado.csv"
 
-            for i, row in df_editado.iterrows():
-                faltas = row["Faltas"]
-                presencas = row["Presenças"]
+                df_reprovados = pd.read_csv(arquivo_reprovado) if os.path.exists(arquivo_reprovado) else pd.DataFrame(columns=df_editado.columns)
+                df_finalizados = pd.read_csv(arquivo_finalizado) if os.path.exists(arquivo_finalizado) else pd.DataFrame(columns=df_editado.columns)
 
-                # Verifica se já está nos arquivos antes de mover
-                ja_reprovado = row["gr"] in df_reprovados["gr"].values
-                ja_finalizado = row["gr"] in df_finalizados["gr"].values
+                mover_reprovados = []
+                mover_finalizados = []
 
-                # ✅ Regra de reprovação
-                if faltas > 3 and not ja_reprovado:
-                    mover_reprovados.append(row)
+                for _, row in df_editado.iterrows():
+                    faltas = int(row["Faltas"])
+                    presencas = int(row["Presenças"])
+                    gr = row["gr"]
 
-                # ✅ Regra de finalização
-                elif presencas >= 16 and not ja_finalizado:
-                    mover_finalizados.append(row)
+                    # Verifica se já está nos arquivos antes de mover
+                    ja_reprovado = gr in df_reprovados["gr"].values
+                    ja_finalizado = gr in df_finalizados["gr"].values
 
-            # Atualiza planilhas
-            if mover_reprovados:
-                df_reprovados = pd.concat([df_reprovados, pd.DataFrame(mover_reprovados)], ignore_index=True)
-                df_reprovados.to_csv(arquivo_reprovado, index=False)
+                    # ✅ Regra de reprovação
+                    if faltas > 3 and not ja_reprovado:
+                        mover_reprovados.append(row)
 
-            if mover_finalizados:
-                df_finalizados = pd.concat([df_finalizados, pd.DataFrame(mover_finalizados)], ignore_index=True)
-                df_finalizados.to_csv(arquivo_finalizado, index=False)
+                    # ✅ Regra de finalização
+                    elif (presencas >= 16 or (presencas + faltas) >= 16 and faltas <= 2) and not ja_finalizado:
+                        mover_finalizados.append(row)
 
-            # Remove da chamada os que foram movidos
-            df_editado = df_editado[
-                ~df_editado["gr"].isin(df_reprovados["gr"]) &
-                ~df_editado["gr"].isin(df_finalizados["gr"])
-            ]
-            df_editado.to_csv(arquivo_chamada, index=False)
+                # Atualiza planilhas
+                if mover_reprovados:
+                    df_reprovados = pd.concat([df_reprovados, pd.DataFrame(mover_reprovados)], ignore_index=True)
+                    df_reprovados.to_csv(arquivo_reprovado, index=False)
 
-            st.success("✅ Chamada salva | Atualizado cadastro | Movidos para Reprovados/Finalizados")
+                if mover_finalizados:
+                    df_finalizados = pd.concat([df_finalizados, pd.DataFrame(mover_finalizados)], ignore_index=True)
+                    df_finalizados.to_csv(arquivo_finalizado, index=False)
+
+                # Remove da chamada os que foram movidos
+                df_editado = df_editado[
+                    ~df_editado["gr"].isin(df_reprovados["gr"]) &
+                    ~df_editado["gr"].isin(df_finalizados["gr"])
+                ]
+                df_editado.to_csv(arquivo_chamada, index=False)
+
+                st.success("✅ Chamada salva | Atualizado cadastro | Movidos para Reprovados/Finalizados")
+
+            
+        with col2:
+            if st.button("❌ Excluir Chamada"):
+                os.remove(arquivo_chamada)
+                st.warning(f"Chamada **{escolha_chamada}** excluída com sucesso!")
+                st.rerun()
+        
+                # ------------------ VISUALIZAÇÃO ------------------ #
+        st.subheader("📌 Alunos Reprovados")
+        if not df_reprovados.empty:
+            df_reprovados_edit = st.data_editor(df_reprovados, num_rows="dynamic", use_container_width=True)
+            df_reprovados_edit.to_csv(arquivo_reprovado, index=False)
+        else:
+            st.info("Nenhum aluno reprovado até agora.")
+
+        st.subheader("📌 Alunos Finalizados")
+        if not df_finalizados.empty:
+            df_finalizados_edit = st.data_editor(df_finalizados, num_rows="dynamic", use_container_width=True)
+            df_finalizados_edit.to_csv(arquivo_finalizado, index=False)
+        else:
+            st.info("Nenhum aluno finalizado até agora.")
 
 
-#teste
