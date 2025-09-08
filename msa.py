@@ -221,9 +221,35 @@ if menu == "📅 Chamada":
                 df_info = df_turma.iloc[0]  # pega info da turma
                 dias = gerar_datas(df_info["dia_aula"], mes, datetime.now().year)
 
+                # ------------------- SOMAR PRESENÇAS/FALTAS DOS MESES ANTERIORES ------------------- #
+                chamadas_existentes = [
+                    f for f in os.listdir()
+                    if f.startswith(escolha_turma) and "_chamada_" in f and not f.endswith(f"_{mes:02d}.csv")
+                ]
+
+                faltas_acumuladas = {}
+                presencas_acumuladas = {}
+
+                for chamada in chamadas_existentes:
+                    df_antigo = pd.read_csv(chamada, dtype=str)
+                    df_antigo["Faltas"] = df_antigo["Faltas"].astype(int)
+                    df_antigo["Presenças"] = df_antigo["Presenças"].astype(int)
+
+                    for i, row in df_antigo.iterrows():
+                        gr = row["gr"]
+                        faltas_acumuladas[gr] = faltas_acumuladas.get(gr, 0) + row["Faltas"]
+                        presencas_acumuladas[gr] = presencas_acumuladas.get(gr, 0) + row["Presenças"]
+
+                # ------------------- CRIAR NOVA CHAMADA ------------------- #
                 df_chamada = df_turma[["gr", "nome_beneficiario"]].copy()
                 df_chamada.insert(2, "Faltas", 0)
                 df_chamada.insert(3, "Presenças", 0)
+
+                # aplica valores acumulados antes de criar colunas novas
+                for i, row in df_chamada.iterrows():
+                    gr = str(row["gr"])
+                    df_chamada.at[i, "Faltas"] = faltas_acumuladas.get(gr, 0)
+                    df_chamada.at[i, "Presenças"] = presencas_acumuladas.get(gr, 0)
 
                 # garante que colunas de chamada sejam texto
                 for dia in dias:
@@ -232,13 +258,14 @@ if menu == "📅 Chamada":
 
                 arquivo_chamada = f"{escolha_turma}_chamada_{mes:02d}.csv"
                 df_chamada.to_csv(arquivo_chamada, index=False)
-                st.success(f"Chamada criada: {arquivo_chamada}")
+                st.success(f"Chamada criada: {arquivo_chamada} (com faltas/presenças acumuladas)")
             else:
                 st.error("Turma não encontrada.")
 
+
     st.divider()
 
-    # ---------- EDITAR CHAMADAS EXISTENTES ----------
+        # ---------- EDITAR CHAMADAS EXISTENTES ----------
     st.subheader("✏️ Editar chamadas existentes")
 
     chamadas = [f.replace(".csv", "") for f in os.listdir() if f.endswith(".csv") and "_chamada_" in f]
@@ -295,12 +322,12 @@ if menu == "📅 Chamada":
                 ja_reprovado = row["gr"] in df_reprovados["gr"].values
                 ja_finalizado = row["gr"] in df_finalizados["gr"].values
 
-                # Regra de reprovação
-                if faltas >= 3 and not ja_reprovado:
+                # ✅ Regra de reprovação
+                if faltas > 3 and not ja_reprovado:
                     mover_reprovados.append(row)
 
-                # Regra de finalização
-                elif (presencas >= 16 or (presencas + faltas >= 16 and faltas <= 2)) and not ja_finalizado:
+                # ✅ Regra de finalização
+                elif presencas >= 16 and not ja_finalizado:
                     mover_finalizados.append(row)
 
             # Atualiza planilhas
@@ -321,17 +348,5 @@ if menu == "📅 Chamada":
 
             st.success("✅ Chamada salva | Atualizado cadastro | Movidos para Reprovados/Finalizados")
 
-    # ------------------ NOVAS ABAS ------------------ #
-    with st.expander("📄 Alunos Finalizados"):
-        if os.path.exists(f"{escolha_chamada}_finalizado.csv"):
-            df_finalizados = pd.read_csv(f"{escolha_chamada}_finalizado.csv")
-            df_finalizados_editado = st.data_editor(df_finalizados, num_rows="dynamic")
-            df_finalizados_editado.to_csv(f"{escolha_chamada}_finalizado.csv", index=False)
-
-    with st.expander("📄 Alunos Reprovados"):
-        if os.path.exists(f"{escolha_chamada}_reprovado.csv"):
-            df_reprovados = pd.read_csv(f"{escolha_chamada}_reprovado.csv")
-            df_reprovados_editado = st.data_editor(df_reprovados, num_rows="dynamic")
-            df_reprovados_editado.to_csv(f"{escolha_chamada}_reprovado.csv", index=False)
 
 #teste
