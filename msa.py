@@ -227,56 +227,53 @@ if menu == "📅 Chamada":
         escolha_turma = st.selectbox("Selecione a turma", turmas, key="turma_chamada")
         mes = st.number_input("Digite o mês (1-12)", min_value=1, max_value=12, value=datetime.now().month)
 
-        if st.button("Gerar chamada"):
-            arquivo_turma = f"{escolha_turma}.csv"
+    if st.button("Gerar chamada"):
+        arquivo_turma = f"{escolha_turma}.csv"
 
-            if os.path.exists(arquivo_turma):
-                df_turma = pd.read_csv(arquivo_turma)
+        if os.path.exists(arquivo_turma):
+            chamadas_existentes = [f for f in os.listdir() if f.startswith(escolha_turma) and "_chamada_" in f and f.endswith(".csv")]
+            chamadas_existentes.sort()
 
-                # criar chamada com datas do mês (corretas pela turma)
-                df_info = df_turma.iloc[0]  # pega info da turma
-                dias = gerar_datas(df_info["dia_aula"], mes, datetime.now().year)
+            if chamadas_existentes:
+                # pega a última chamada existente
+                ultima_chamada = chamadas_existentes[-1]
+                df_base = pd.read_csv(ultima_chamada)
 
-                # ------------------- SOMAR PRESENÇAS/FALTAS DOS MESES ANTERIORES ------------------- #
-                chamadas_existentes = [
-                    f for f in os.listdir()
-                    if f.startswith(escolha_turma) and "_chamada_" in f and not f.endswith(f"_{mes:02d}.csv")
-                ]
+                # só mantém quem ainda não foi reprovado/finalizado
+                if os.path.exists(f"{escolha_turma}_chamada_{mes-1:02d}_reprovados.csv"):
+                    df_reprovados = pd.read_csv(f"{escolha_turma}_chamada_{mes-1:02d}_reprovados.csv")
+                    df_base = df_base[~df_base["gr"].isin(df_reprovados["gr"])]
 
-                faltas_acumuladas = {}
-                presencas_acumuladas = {}
+                if os.path.exists(f"{escolha_turma}_chamada_{mes-1:02d}_finalizados.csv"):
+                    df_finalizados = pd.read_csv(f"{escolha_turma}_chamada_{mes-1:02d}_finalizados.csv")
+                    df_base = df_base[~df_base["gr"].isin(df_finalizados["gr"])]
 
-                for chamada in chamadas_existentes:
-                    df_antigo = pd.read_csv(chamada, dtype=str)
-                    df_antigo["Faltas"] = df_antigo["Faltas"].astype(int)
-                    df_antigo["Presenças"] = df_antigo["Presenças"].astype(int)
-
-                    for i, row in df_antigo.iterrows():
-                        gr = row["gr"]
-                        faltas_acumuladas[gr] = faltas_acumuladas.get(gr, 0) + row["Faltas"]
-                        presencas_acumuladas[gr] = presencas_acumuladas.get(gr, 0) + row["Presenças"]
-
-                # ------------------- CRIAR NOVA CHAMADA ------------------- #
-                df_chamada = df_turma[["gr", "nome_beneficiario"]].copy()
-                df_chamada.insert(2, "Faltas", 0)
-                df_chamada.insert(3, "Presenças", 0)
-
-                # aplica valores acumulados antes de criar colunas novas
-                for i, row in df_chamada.iterrows():
-                    gr = str(row["gr"])
-                    df_chamada.at[i, "Faltas"] = faltas_acumuladas.get(gr, 0)
-                    df_chamada.at[i, "Presenças"] = presencas_acumuladas.get(gr, 0)
-
-                # garante que colunas de chamada sejam texto
-                for dia in dias:
-                    df_chamada[dia] = "N"
-                    df_chamada[dia] = df_chamada[dia].astype(str)
-
-                arquivo_chamada = f"{escolha_turma}_chamada_{mes:02d}.csv"
-                df_chamada.to_csv(arquivo_chamada, index=False)
-                st.success(f"Chamada criada: {arquivo_chamada} (com faltas/presenças acumuladas)")
+                # pega informações de dia_aula do cadastro original
+                df_info = pd.read_csv(arquivo_turma).iloc[0]
             else:
-                st.error("Turma não encontrada.")
+                # primeira chamada → usa turma original
+                df_base = pd.read_csv(arquivo_turma)
+                df_info = df_base.iloc[0]
+
+            # ---------- criar chamada do novo mês ----------
+            dias = gerar_datas(df_info["dia_aula"], mes, datetime.now().year)
+
+            # garante colunas de faltas e presenças
+            if "Faltas" not in df_base.columns:
+                df_base["Faltas"] = 0
+            if "Presenças" not in df_base.columns:
+                df_base["Presenças"] = 0
+
+            df_chamada = df_base[["gr", "nome_beneficiario", "Faltas", "Presenças"]].copy()
+
+            for dia in dias:
+                df_chamada[dia] = ""
+
+            arquivo_chamada = f"{escolha_turma}_chamada_{mes:02d}.csv"
+            df_chamada.to_csv(arquivo_chamada, index=False)
+            st.success(f"Chamada criada: {arquivo_chamada}")
+        else:
+            st.error("Turma não encontrada.")
 
 
     st.divider()
@@ -305,15 +302,16 @@ if menu == "📅 Chamada":
 
         with col1:    
             if st.button("Salvar Chamada"):
-                # Recalcula faltas/presenças antes de salvar
+                # Recalcula faltas/presenças a partir da chamada atual (sem duplicar)
                 for i, row in df_editado.iterrows():
                     respostas = row.drop(labels=["gr", "nome_beneficiario", "Faltas", "Presenças"])
-                    faltas = (respostas == "A").sum()
-                    presencas = (respostas == "P").sum()
-                    df_editado.at[i, "Faltas"] = faltas
-                    df_editado.at[i, "Presenças"] = presencas
+                    faltas_mes = (respostas == "A").sum()
+                    presencas_mes = (respostas == "P").sum()
 
-                df_editado.to_csv(arquivo_chamada, index=False)
+                    # Atualiza os valores apenas com base no mês atual
+                    df_editado.at[i, "Faltas"] = faltas_mes
+                    df_editado.at[i, "Presenças"] = presencas_mes
+
 
                 # Atualizar faltas no cadastro da turma
                 turma_nome = escolha_chamada.split("_chamada_")[0]
@@ -324,8 +322,8 @@ if menu == "📅 Chamada":
                     df_turma.to_csv(f"{turma_nome}.csv", index=False)
 
                 # ------------------ NOVA LÓGICA ------------------ #
-                arquivo_reprovado = f"{escolha_chamada}_reprovado.csv"
-                arquivo_finalizado = f"{escolha_chamada}_finalizado.csv"
+                arquivo_reprovado = "reprovados.csv"
+                arquivo_finalizado = "finalizados.csv"
 
                 df_reprovados = pd.read_csv(arquivo_reprovado) if os.path.exists(arquivo_reprovado) else pd.DataFrame(columns=df_editado.columns)
                 df_finalizados = pd.read_csv(arquivo_finalizado) if os.path.exists(arquivo_finalizado) else pd.DataFrame(columns=df_editado.columns)
@@ -366,28 +364,31 @@ if menu == "📅 Chamada":
                 ]
                 df_editado.to_csv(arquivo_chamada, index=False)
 
-                st.success("✅ Chamada salva | Atualizado cadastro | Movidos para Reprovados/Finalizados")
+                st.success("✅ Chamada salva | Atualizado cadastro | Movidos para Reprovados/Finalizados (geral)")
 
-            
         with col2:
             if st.button("❌ Excluir Chamada"):
                 os.remove(arquivo_chamada)
                 st.warning(f"Chamada **{escolha_chamada}** excluída com sucesso!")
                 st.rerun()
         
-                # ------------------ VISUALIZAÇÃO ------------------ #
-        st.subheader("📌 Alunos Reprovados")
+        # ------------------ VISUALIZAÇÃO ------------------ #
+        arquivo_reprovado = "reprovados.csv"
+        arquivo_finalizado = "finalizados.csv"
+
+        df_reprovados = pd.read_csv(arquivo_reprovado) if os.path.exists(arquivo_reprovado) else pd.DataFrame()
+        df_finalizados = pd.read_csv(arquivo_finalizado) if os.path.exists(arquivo_finalizado) else pd.DataFrame()
+
+        st.subheader("📌 Alunos Reprovados (geral)")
         if not df_reprovados.empty:
             df_reprovados_edit = st.data_editor(df_reprovados, num_rows="dynamic", use_container_width=True)
             df_reprovados_edit.to_csv(arquivo_reprovado, index=False)
         else:
             st.info("Nenhum aluno reprovado até agora.")
 
-        st.subheader("📌 Alunos Finalizados")
+        st.subheader("📌 Alunos Finalizados (geral)")
         if not df_finalizados.empty:
             df_finalizados_edit = st.data_editor(df_finalizados, num_rows="dynamic", use_container_width=True)
             df_finalizados_edit.to_csv(arquivo_finalizado, index=False)
         else:
             st.info("Nenhum aluno finalizado até agora.")
-
-
